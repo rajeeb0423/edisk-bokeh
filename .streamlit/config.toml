@@ -1,7 +1,7 @@
-[theme]
-base = "light"
-
 [server]
 maxMessageSize = 500
 
 disconnectedSessionTTL = 300
+
+[theme]
+base = "light"
