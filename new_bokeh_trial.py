@@ -41,7 +41,7 @@ def plot_figure(file_path, color_map, z_value, minval=None, maxval=None, contour
 
     mapper = LinearColorMapper(palette=color_map,low=minval, high=maxval, nan_color='white')
 
-    p = figure(width=500, height=500, x_axis_label=r'$$\Delta \text{ R.A. (arcsec)}$$', y_axis_label=r'$$\Delta \text{ Dec. (arcsec)}$$', tooltips=[("x", "$x"), ("y", "$y"), z_value])
+    p = figure(width=300, height=300, x_axis_label=r'$$\Delta \text{ R.A. (arcsec)}$$', y_axis_label=r'$$\Delta \text{ Dec. (arcsec)}$$', tooltips=[("x", "$x"), ("y", "$y"), z_value])
     p.x_range.range_padding = p.y_range.range_padding = 0
 
     if x_range == None:
