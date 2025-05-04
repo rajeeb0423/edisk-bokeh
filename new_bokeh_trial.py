@@ -114,8 +114,8 @@ with fits.open(cont_img) as cont_hdul:
     print(full_size)
 p1 = plot_figure(cont_img, 'Inferno256', ("Intensity", "@image Jy/beam"))
 p2 = plot_figure(mom8_img, hex_vals[::-1], ("Intensity", "@image Jy/beam"), contour_x = xx,contour_y = yy, contour_data = cont_img_data, x_range = p1.x_range, y_range = p1.y_range, extra_x_range = p1.extra_x_ranges)
-#p3 = plot_figure(mom9_img, hex_vals2[::-1], ("Velocity", "@image km/s"), contour_x = xx,contour_y = yy, contour_data = cont_img_data, x_range = p1.x_range, y_range = p1.y_range, extra_x_range = p1.extra_x_ranges)
+p3 = plot_figure(mom9_img, hex_vals2[::-1], ("Velocity", "@image km/s"), contour_x = xx,contour_y = yy, contour_data = cont_img_data, x_range = p1.x_range, y_range = p1.y_range, extra_x_range = p1.extra_x_ranges)
 
-p_all = gridplot([[p1, p2]], toolbar_location='right')
+p_all = gridplot([[p1, p2, p3]], toolbar_location='right')
 
 streamlit_bokeh(p_all, use_container_width=True)
