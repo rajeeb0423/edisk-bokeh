@@ -1,0 +1,2 @@
+numpy
+astropy==5.3.*
