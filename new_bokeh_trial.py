@@ -1,5 +1,6 @@
 import numpy as np
 import streamlit as st
+import glob
 
 from astropy import wcs
 from astropy.io import fits
@@ -20,7 +21,7 @@ def drawContours(contstart=None,contend=None,contnoise=None):
     return contours
 
 
-def plot_figure(file_path, color_map, z_value, minval=None, maxval=None, contour_x=None, contour_y=None, contour_data=None, x_range=None, y_range=None, extra_x_range=None):
+def plot_figure(file_path, color_map, z_value, crosshair_width, crosshair_height, minval=None, maxval=None, contour_x=None, contour_y=None, contour_data=None, x_range=None, y_range=None, extra_x_range=None):
     hdul = fits.open(file_path)
     img =hdul[0]
     w = wcs.WCS(img.header, hdul)
@@ -80,42 +81,61 @@ def plot_figure(file_path, color_map, z_value, minval=None, maxval=None, contour
         p.contour(contour_x, contour_y, contour_data, contours, line_color="black")
 
 
-    p.add_tools(CrosshairTool(overlay=[width, height]))
+    p.add_tools(CrosshairTool(overlay=[crosshair_width, crosshair_height]))
 
     return p
 
+def main():
+    st.set_page_config(page_title= 'eDisk Spectral Plots', page_icon='eDisk_logo_ver.4.jpg',layout="wide")
 
-cmap = matplotlib.colormaps['Spectral']
-hex_vals = [matplotlib.colors.rgb2hex(cmap(i)) for i in range(cmap.N)]
+    molecules=['12CO', '13CO', 'C18O', 'DCN', 'CH3OH', 'SiO', 
+             'SO', 'H2CO_3_03-2_02_218.22GHz', 
+             'H2CO_3_21-2_20_218.76GHz',  
+             'H2CO_3_22-2_21_218.47GHz',
+             'C3H2_217.82',
+             'C3H2_217.94',
+             'C3H2_218.16']
 
-cmap2 = matplotlib.colormaps['RdBu']
-hex_vals2 = [matplotlib.colors.rgb2hex(cmap2(i)) for i in range(cmap2.N)]
 
-width = Span(dimension="width", line_dash="dashed", line_width=2)
-height = Span(dimension="height", line_dash="dotted", line_width=2)
+    mom8_imgs = glob.glob('*robust_2.0_mom8_15arcsec.fits')
+    mom9_imgs = glob.glob('*robust_2.0_mom9_15arcsec.fits')
+    
+    mol=st.sidebar.selectbox('Select the molecule:',molecules)
+    mom8_idx = [i for i, s in enumerate(mom8_imgs) if mol in s][0]
+    mom9_idx = [i for i, s in enumerate(mom9_imgs) if mol in s][0]
+    mom8_img = mom8_imgs[mom8_idx]
+    mom9_img = mom9_imgs[mom9_idx]
 
-st.set_page_config(layout="wide",)
+    cmap = matplotlib.colormaps['Spectral']
+    hex_vals = [matplotlib.colors.rgb2hex(cmap(i)) for i in range(cmap.N)]
 
-mom8_img = 'CB68_SBLB_12CO_robust_2.0_mom8_15arcsec.fits'
-mom9_img = 'CB68_SBLB_12CO_robust_2.0_mom9_15arcsec.fits'
-cont_img = 'CB68_SBLB_continuum_robust_2.0.pbcor.tt0.fits'
+    cmap2 = matplotlib.colormaps['RdBu']
+    hex_vals2 = [matplotlib.colors.rgb2hex(cmap2(i)) for i in range(cmap2.N)]
 
-with fits.open(cont_img) as cont_hdul:
-    cont_img_data = cont_hdul[0].data
-    header = cont_hdul[0].header
+    crosshair_width = Span(dimension="width", line_dash="dashed", line_width=2)
+    crosshair_height = Span(dimension="height", line_dash="dotted", line_width=2)
 
-    pixel_size = - header['cdelt1']*3600.
-    full_size = len(cont_img_data)*pixel_size
-    y = np.linspace(-full_size/2, full_size/2, cont_img_data.shape[0])
-    x = np.linspace(-full_size/2, full_size/2, cont_img_data.shape[1])
+    cont_img = 'CB68_SBLB_continuum_robust_2.0.pbcor.tt0.fits'
 
-    xx, yy = np.meshgrid(x,y)
+    with fits.open(cont_img) as cont_hdul:
+        cont_img_data = cont_hdul[0].data
+        header = cont_hdul[0].header
 
-    print(full_size)
-#p1 = plot_figure(cont_img, 'Inferno256', ("Intensity", "@image Jy/beam"))
-p2 = plot_figure(mom8_img, hex_vals[::-1], ("Intensity", "@image Jy/beam"), contour_x = xx, contour_y = yy, contour_data = cont_img_data)
-p3 = plot_figure(mom9_img, hex_vals2[::-1], ("Velocity", "@image km/s"), contour_x = xx, contour_y = yy, contour_data = cont_img_data, x_range = p2.x_range, y_range = p2.y_range, extra_x_range = p2.extra_x_ranges)
+        pixel_size = - header['cdelt1']*3600.
+        full_size = len(cont_img_data)*pixel_size
+        y = np.linspace(-full_size/2, full_size/2, cont_img_data.shape[0])
+        x = np.linspace(-full_size/2, full_size/2, cont_img_data.shape[1])
 
-p_all = gridplot([[p2, p3]], toolbar_location='right')
+        xx, yy = np.meshgrid(x,y)
 
-streamlit_bokeh(p_all, use_container_width=True)
+        print(full_size)
+    #p1 = plot_figure(cont_img, 'Inferno256', ("Intensity", "@image Jy/beam"))
+    p2 = plot_figure(mom8_img, hex_vals[::-1], ("Intensity", "@image Jy/beam"), crosshair_width, crosshair_height, contour_x = xx, contour_y = yy, contour_data = cont_img_data)
+    p3 = plot_figure(mom9_img, hex_vals2[::-1], ("Velocity", "@image km/s"), crosshair_width, crosshair_height, contour_x = xx, contour_y = yy, contour_data = cont_img_data, x_range = p2.x_range, y_range = p2.y_range, extra_x_range = p2.extra_x_ranges)
+
+    p_all = gridplot([[p2, p3]], toolbar_location='right')
+
+    streamlit_bokeh(p_all, use_container_width=True)
+
+if __name__=='__main__':
+    main()
