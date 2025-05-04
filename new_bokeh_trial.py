@@ -80,51 +80,6 @@ def plot_figure(file_path, color_map, z_value, minval=None, maxval=None, contour
         p.contour(contour_x, contour_y, contour_data, contours, line_color="black")
 
 
-    '''
-# Create a ColumnDataSource to hold the dynamic label text and position
-    label_source = ColumnDataSource(data=dict(x=[380], y=[420], text=[""]))
-
-# Add a LabelSet (note this supports data source)
-    label_set = LabelSet(
-    x='x', y='y', text='text', source=label_source,
-    x_units='screen', y_units='screen',
-    text_align='center', text_baseline='middle',
-    background_fill_color='white',
-    background_fill_alpha=0.8)
-
-    p.add_layout(label_set)
-    print('Start and end: ', p.x_range.start, p.x_range.end)
-
-# JavaScript callback to update the label
-    callback = CustomJS(args=dict(x_range=p.x_range, source=label_source), code="""
-    // Get current x-axis range width
-    const x_start = x_range.start;
-    const x_end = x_range.end;
-    const bar_length_fraction = 0.9;
-    const unit_multiplier = 150;
-
-    const range_width = x_end - x_start;
-    const raw_value = range_width * bar_length_fraction;
-    const scaled_value = raw_value * unit_multiplier;
-
-    // Round to one decimal
-    const label_text = scaled_value.toFixed(1) + " au";
-
-    // Update the label text
-    source.data['text'][0] = label_text;
-    source.change.emit();
-                        """)
-
-# Trigger the callback on x_range changes (zooming/panning)
-    p.x_range.js_on_change('start', callback)
-    p.x_range.js_on_change('end', callback)
-
-# Initial trigger so label shows on load
-    callback.args["x_range"] = p.x_range
-    callback.args["source"] = label_source
-    callback.code += "\n" + "// Initial trigger\nsource.change.emit();"
-    '''
-
     p.add_tools(CrosshairTool(overlay=[width, height]))
 
     return p
@@ -158,9 +113,9 @@ with fits.open(cont_img) as cont_hdul:
 
     print(full_size)
 p1 = plot_figure(cont_img, 'Inferno256', ("Intensity", "@image Jy/beam"))
-p2 = plot_figure(mom8_img, hex_vals[::-1], ("Intensity", "@image Jy/beam"), contour_x = xx,contour_y = yy, contour_data = cont_img_data, x_range = p1.x_range, y_range = p1.y_range, extra_x_range = p1.extra_x_ranges)
-p3 = plot_figure(mom9_img, hex_vals2[::-1], ("Velocity", "@image km/s"), contour_x = xx,contour_y = yy, contour_data = cont_img_data, x_range = p1.x_range, y_range = p1.y_range, extra_x_range = p1.extra_x_ranges)
+#p2 = plot_figure(mom8_img, hex_vals[::-1], ("Intensity", "@image Jy/beam"), contour_x = xx,contour_y = yy, contour_data = cont_img_data, x_range = p1.x_range, y_range = p1.y_range, extra_x_range = p1.extra_x_ranges)
+#p3 = plot_figure(mom9_img, hex_vals2[::-1], ("Velocity", "@image km/s"), contour_x = xx,contour_y = yy, contour_data = cont_img_data, x_range = p1.x_range, y_range = p1.y_range, extra_x_range = p1.extra_x_ranges)
 
-p_all = gridplot([[p1, p2, p3]], toolbar_location='right')
+p_all = gridplot([[p1]], toolbar_location='right')
 
 streamlit_bokeh(p_all, use_container_width=True)
