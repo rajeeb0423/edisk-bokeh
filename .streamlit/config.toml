@@ -1,7 +1,7 @@
 [server]
 maxMessageSize = 500
 
-enableWebsocketCompression = true
+# enableWebsocketCompression = true
 
 disconnectedSessionTTL = 300
 
