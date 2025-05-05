@@ -1,6 +1,8 @@
 [server]
 maxMessageSize = 500
 
+enableWebsocketCompression = true
+
 disconnectedSessionTTL = 300
 
 [theme]
